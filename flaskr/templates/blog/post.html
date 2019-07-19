@@ -45,9 +45,12 @@
     <h2>Comments</h2>
       <form method="post">
         <label for="name">Name</label>
-        <input name="name" id="name" value="{% if g.user['id'] %}{{ g.user['username'] }}{% endif %}" required>
+        <!--<input name="name" id="name" value="{% if g.user['id'] %}{{ g.user['username'] }}{% endif %}" required>-->
+        <input name="name" id="name" value="{{ request.form['name'] }}" required>
         <label for="comment">Comment</label>
-        <textarea name="comment" id="comment">{{ request.form['comment'] }}</textarea>
+        <textarea name="comment" id="comment">
+            {{ request.form['comment'] }}
+        </textarea>
         <input type="submit" value="Save">
       </form>
     {% for comment in comments %}
