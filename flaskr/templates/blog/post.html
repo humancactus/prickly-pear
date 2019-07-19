@@ -1,0 +1,71 @@
+<!--<style>-->
+    <!--nav { background: lightgray; display: flex; align-items: center; padding: 0 0.5rem; }-->
+    <!--nav h1 { flex: auto; margin: 0; }-->
+    <!--nav h1 a { text-decoration: none; padding: 0.25rem 0.5rem; }-->
+    <!--nav ul  { display: flex; list-style: none; margin: 0; padding: 0; }-->
+    <!--nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; }-->
+<!--</style>-->
+
+{% extends 'base.html' %}
+
+{% block header %}
+    <nav>
+    <h1>Posts</h1>
+    <ul>
+    {% if g.user %}
+    <li><span>{{ g.user['username'] }}</span>
+    <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
+    {% else %}
+    <li><a href="{{ url_for('auth.register') }}">Register</a>
+    <li><a href="{{ url_for('auth.login') }}">Log In</a>
+    {% endif %}
+    </ul>
+    </nav>
+  <!--<h1>{% block title %}Posts{% endblock %}</h1>-->
+  {% if g.user %}
+    <a class="action" href="{{ url_for('blog.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+    <article class="post">
+      <header>
+        <div>
+          <h1>{{ post['title'] }}</h1>
+          <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
+        </div>
+        {% if g.user['id'] == post['author_id'] %}
+          <a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
+        {% endif %}
+      </header>
+      <p class="body">{{ post['body'] }}</p>
+    </article>
+
+    <hr>
+    <h2>Comments</h2>
+      <form method="post">
+        <label for="name">Name</label>
+        <input name="name" id="name" value="{% if g.user['id'] %}{{ g.user['username'] }}{% endif %}" required>
+        <label for="comment">Comment</label>
+        <textarea name="comment" id="comment">{{ request.form['comment'] }}</textarea>
+        <input type="submit" value="Save">
+      </form>
+    {% for comment in comments %}
+    <div class="comment">
+        <div>
+            {{ comment['body'] }}
+        </div>
+        <div class="about">
+            by
+            {% if comment['author_id'] %}
+            <a href={{ url_for('blog.index', id=comment['author_id']) }}>
+                {% endif %}
+                {{ comment['author_name'] }}
+                {% if comment['author_id'] %}
+            </a>
+            {% endif %} 
+            on {{ comment['created'].strftime('%Y-%m-%d') }}
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

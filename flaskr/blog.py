@@ -59,7 +59,42 @@ def get_post(id, check_author=True):
 
     return post
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+def get_comments(post_id):
+    comments = get_db().execute(
+        'SELECT *'
+        ' FROM post_comment c' #  JOIN user u ON p.author_id = u.id'
+        ' WHERE c.post_id = ?',
+        (post_id,)
+    )
+
+    return comments
+
+@bp.route('/blog/<int:id>', methods=(['GET','POST']))
+def view(id):
+    post = get_post(id, check_author=False)
+
+    # Comment submission
+    if request.method == 'POST':
+        comment = request.form['comment']
+        print("comment ", comment)
+        author_name = request.form['name']
+        print("author_name ", author_name)
+        author_id = g.user['id'] if g.user and 'id' in g.user else None
+        print("author_id ", author_id)
+        
+        db = get_db()
+        db.execute(
+            'INSERT INTO post_comment (post_id, author_id, author_name, body)'
+            ' VALUES (?, ?, ?, ?)',
+            (id, author_id, author_name, comment)
+        )
+        db.commit()
+
+
+    comments = get_comments(id) #  ['test', 'this', 'out']
+    return render_template('blog/post.html', post=post, comments=comments)
+
+@bp.route('/blog/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
     post = get_post(id)
